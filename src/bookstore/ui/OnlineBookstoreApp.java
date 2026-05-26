@@ -89,7 +89,7 @@ public class OnlineBookstoreApp extends JFrame {
         setLayout(new BorderLayout(0, 0));
 
         add(Theme.createHeader("Online Book Store",
-                        "Register an account, then log in to browse and checkout"),
+                "Register an account, then log in to browse and checkout"),
                 BorderLayout.NORTH);
 
         JPanel center = new JPanel(new BorderLayout(12, 0));
@@ -257,10 +257,7 @@ public class OnlineBookstoreApp extends JFrame {
         btnRegister.addActionListener(e -> promptRegister());
         btnLogin.addActionListener(e -> promptLogin());
         btnLogout.addActionListener(e -> {
-            user.logout();
-            user = new UserProxy("Guest", false);
-            updateUserStatus();
-            showInfo("Logged out.");
+            System.exit(0);
         });
         btnCheckout.addActionListener(e -> checkout());
         btnHistory.addActionListener(e -> showOrderHistory());
@@ -269,13 +266,8 @@ public class OnlineBookstoreApp extends JFrame {
     }
 
     private void showWelcomeMessage() {
-        JOptionPane.showMessageDialog(this,
-                "Welcome to Online Book Store!\n\n"
-                        + "1. Click Register to create an account\n"
-                        + "2. Click Log In with your username and password\n"
-                        + "3. Then you can add books and checkout",
-                "Online Book Store",
-                JOptionPane.INFORMATION_MESSAGE);
+        WelcomeDialog.show(this, () -> {
+        }, this::promptLogin);
     }
 
     private void promptRegister() {
@@ -414,7 +406,7 @@ public class OnlineBookstoreApp extends JFrame {
         }
 
         status.append(String.format("\nTotal paid: $%.2f", total));
-        JOptionPane.showMessageDialog(this, status, "Checkout Complete", JOptionPane.INFORMATION_MESSAGE);
+        showExitDialog(status, "Checkout Complete");
 
         cart.clearCart();
         savedCart = null;
@@ -431,7 +423,7 @@ public class OnlineBookstoreApp extends JFrame {
         area.setBorder(Theme.padded(8));
         JScrollPane scroll = new JScrollPane(area);
         scroll.setPreferredSize(new Dimension(520, 360));
-        JOptionPane.showMessageDialog(this, scroll, "Order History", JOptionPane.PLAIN_MESSAGE);
+        showExitDialog(scroll, "Order History");
     }
 
     private void refreshInventory() {
@@ -508,6 +500,14 @@ public class OnlineBookstoreApp extends JFrame {
 
     private void showInfo(String message) {
         JOptionPane.showMessageDialog(this, message, "Online Book Store", JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    private void showExitDialog(Object message, String title) {
+        int result = JOptionPane.showConfirmDialog(this, message, title, JOptionPane.OK_CANCEL_OPTION,
+                JOptionPane.INFORMATION_MESSAGE);
+        if (result == JOptionPane.OK_OPTION) {
+            System.exit(0);
+        }
     }
 
     private void showWarning(String message) {
