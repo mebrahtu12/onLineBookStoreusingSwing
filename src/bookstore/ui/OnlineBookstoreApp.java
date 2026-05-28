@@ -225,6 +225,7 @@ public class OnlineBookstoreApp extends JFrame {
         btnLogout = Theme.secondaryButton("Log Out");
         StyledButton btnCheckout = Theme.primaryButton("Checkout");
         StyledButton btnHistory = Theme.secondaryButton("Order History");
+        StyledButton btnPayNow = Theme.primaryButton("Pay Now");
 
         buttons.add(btnAdd);
         buttons.add(btnRemove);
@@ -234,6 +235,7 @@ public class OnlineBookstoreApp extends JFrame {
         buttons.add(btnLogin);
         buttons.add(btnCheckout);
         buttons.add(btnHistory);
+        buttons.add(btnPayNow);
 
         JPanel logoutPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
         logoutPanel.setBackground(Theme.BACKGROUND);
@@ -261,6 +263,7 @@ public class OnlineBookstoreApp extends JFrame {
         });
         btnCheckout.addActionListener(e -> checkout());
         btnHistory.addActionListener(e -> showOrderHistory());
+        btnPayNow.addActionListener(e -> showPaymentOptions());
 
         updateUserStatus();
     }
@@ -424,6 +427,47 @@ public class OnlineBookstoreApp extends JFrame {
         JScrollPane scroll = new JScrollPane(area);
         scroll.setPreferredSize(new Dimension(520, 360));
         showExitDialog(scroll, "Order History");
+    }
+
+    private void showPaymentOptions() {
+        if (cart.getBooks().isEmpty()) {
+            showWarning("Your cart is empty. Add books before choosing a payment method.");
+            return;
+        }
+
+        String[] options = { "PayPal", "Credit Card", "Wallet" };
+        int choice = JOptionPane.showOptionDialog(
+                this,
+                "Select a payment method:",
+                "Pay Now",
+                JOptionPane.DEFAULT_OPTION,
+                JOptionPane.PLAIN_MESSAGE,
+                null,
+                options,
+                options[0]);
+        if (choice < 0) {
+            return;
+        }
+
+        String selectedMethod = options[choice];
+        double total = cart.getTotalAmount();
+        int confirm = JOptionPane.showConfirmDialog(
+                this,
+                String.format("Confirm payment of $%.2f using %s?", total, selectedMethod),
+                "Confirm Payment",
+                JOptionPane.OK_CANCEL_OPTION,
+                JOptionPane.QUESTION_MESSAGE);
+
+        if (confirm != JOptionPane.OK_OPTION) {
+            showInfo("Payment cancelled.");
+            return;
+        }
+
+        if (paymentSystem.processPayment(total, selectedMethod)) {
+            showInfo("Payment confirmed with " + selectedMethod + ".");
+        } else {
+            showWarning("Payment failed using " + selectedMethod + ". Try another payment option.");
+        }
     }
 
     private void refreshInventory() {

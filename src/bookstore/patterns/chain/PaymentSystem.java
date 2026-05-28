@@ -29,6 +29,21 @@ public class PaymentSystem {
         return false;
     }
 
+    public boolean processPayment(double amount, String methodName) {
+        PaymentHandler current = handlerChain;
+        while (current != null) {
+            if (current.getName().equalsIgnoreCase(methodName)
+                    && current.canPay(amount)
+                    && current.process(amount)) {
+                lastMethodUsed = current.getName();
+                return true;
+            }
+            current = current.getNext();
+        }
+        lastMethodUsed = "None";
+        return false;
+    }
+
     public String getLastMethodUsed() {
         return lastMethodUsed;
     }
